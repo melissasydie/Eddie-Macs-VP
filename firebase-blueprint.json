@@ -1,0 +1,53 @@
+{
+  "entities": {
+    "Category": {
+      "title": "Category",
+      "description": "Menu category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "order": { "type": "number" }
+      },
+      "required": ["name", "order"]
+    },
+    "MenuItem": {
+      "title": "MenuItem",
+      "description": "A standard menu item",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 500 },
+        "price": { "type": "string", "maxLength": 50 },
+        "categoryId": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["name", "price", "categoryId"]
+    },
+    "DailySpecial": {
+      "title": "DailySpecial",
+      "description": "A daily special offer",
+      "type": "object",
+      "properties": {
+        "dayOfWeek": { "type": "string", "maxLength": 20 },
+        "title": { "type": "string", "maxLength": 150 },
+        "description": { "type": "string", "maxLength": 500 },
+        "price": { "type": "string", "maxLength": 50 },
+        "colorTheme": { "type": "string", "maxLength": 30 }
+      },
+      "required": ["dayOfWeek", "title", "price", "colorTheme"]
+    }
+  },
+  "firestore": {
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Menu categories"
+    },
+    "/menuItems/{itemId}": {
+      "schema": { "$ref": "#/entities/MenuItem" },
+      "description": "Menu items"
+    },
+    "/dailySpecials/{specialId}": {
+      "schema": { "$ref": "#/entities/DailySpecial" },
+      "description": "Daily specials"
+    }
+  }
+}

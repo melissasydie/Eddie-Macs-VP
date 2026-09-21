@@ -1,0 +1,6 @@
+{
+  "name": "Eddie Macs @ VP",
+  "description": "Eddie Macs @ VP - Sports Club, Grub & Function Venue",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

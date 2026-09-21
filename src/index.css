@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Yellowtail&display=swap');
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'The Slug And The Lion';
+  src: url('/assets/fonts/the-slug-and-the-lion.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bar Booth At Matts';
+  src: url('/assets/fonts/bar-booth-at-matts.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lost In South';
+  src: url('/assets/fonts/lost-in-south.ttf') format('truetype'),
+       url('/assets/fonts/lost-in-south.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --font-slug: 'The Slug And The Lion', Impact, sans-serif;
+  --font-bar: 'Bar Booth At Matts', sans-serif;
+  --font-lost: 'Lost In South', sans-serif;
+  --font-yellowtail: 'Yellowtail', cursive;
+}
+
+body {
+  font-family: var(--font-bar);
+}
