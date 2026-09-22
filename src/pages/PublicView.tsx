@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Home, Sun, Briefcase, Gift, Trophy, CheckCircle2, Beer, Utensils, Pizza, Flame, Phone, MapPin, Globe, Menu as MenuIcon, MessageCircle, X, ChevronRight, ArrowLeft, ChevronLeft, Send, Mail, Tv, Users, Music, Clock, Calendar, Car, Facebook, Instagram, Download, FileText, Eye, Loader2, Check, AlertCircle } from 'lucide-react';
+import { Home, Sun, Briefcase, Gift, Trophy, CheckCircle2, Beer, Utensils, Pizza, Flame, Phone, MapPin, Globe, Menu as MenuIcon, MessageCircle, X, ChevronRight, ArrowLeft, ChevronLeft, Send, Mail, Tv, Users, Music, Clock, Calendar, Car, Facebook, Instagram, Download, FileText, Eye, Loader2, Check, AlertCircle, Cigarette } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MailingListForm, ContactAndBookingForm } from '../components/ContactForms';
 
@@ -547,7 +547,7 @@ function HomeView({ setCurrentView, scrollToContact, scrollToAbout }: { setCurre
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-6xl font-black uppercase tracking-widest text-white mb-6 border-b-4 border-red-600 inline-block pb-2" style={{ fontFamily: 'var(--font-slug)' }}>About Us</h2>
           <p className="text-stone-300 text-lg md:text-xl leading-relaxed font-medium max-w-3xl mx-auto">
-            Welcome to Eddie Macs@VP, where history meets the thrill of the game! Nestled in the heart of Port Elizabeth, our sports pub and grub has been a cornerstone of the community, with the building occupying the land we stand on since 1870, making us a part of a legacy that spans over a century.
+            Welcome to Eddie Macs@VP, where history meets the thrill of the game! Nestled in the heart of Port Elizabeth, our sports club and grub has been a cornerstone of the community, with the building occupying the land we stand on since 1870, making us a part of a legacy that spans over a century.
           </p>
         </div>
         
@@ -559,7 +559,7 @@ function HomeView({ setCurrentView, scrollToContact, scrollToAbout }: { setCurre
             </div>
             <h3 className="text-xl font-bold text-white mb-3 uppercase tracking-wider" style={{ fontFamily: 'var(--font-slug)' }}>The Experience</h3>
             <p className="text-stone-400 leading-relaxed">
-              As Gqeberha's premier sports hub, we're not just a pub - we're an experience. From the moment you step through our doors, you're greeted with the electrifying atmosphere of live sports, the tantalizing aroma of affordable, mouth-watering meals, and the refreshing taste of cold beers on tap. And with the best local music talent providing the soundtrack to your visit, every moment at Eddie Macs@VP is a celebration.
+              As Gqeberha's premier sports hub, we're not just a pub - we're an experience. From the moment you step through our doors, you're greeted with the electrifying atmosphere of live sports, the tantalizing aroma of affordable, mouth-watering meals, and the refreshing taste of cold beers on tap. And with the best local music talent providing the soundtrack to your visit, and enough space to host almost every function imaginable, every moment at Eddie Macs@VP is a celebration.
             </p>
           </div>
 
@@ -570,7 +570,7 @@ function HomeView({ setCurrentView, scrollToContact, scrollToAbout }: { setCurre
             </div>
             <h3 className="text-xl font-bold text-white mb-3 uppercase tracking-wider" style={{ fontFamily: 'var(--font-slug)' }}>The Location</h3>
             <p className="text-stone-400 leading-relaxed">
-              Conveniently located just five minutes from PE's Chief Dawid Stuurman International Airport, harbour, freeway, and beachfront, we offer secure parking for over 100 cars. Our spacious venue features a large lounge that can comfortably seat over 200 guests, a cozy side room for more intimate gatherings of up to 40 people, and expansive outdoor decks perfect for soaking up the sun.
+              Conveniently located just five minutes from PE/GQ's Chief Dawid Stuurman International Airport, harbour, freeway, and beachfront, we offer secure parking for over 100 cars. Our spacious venue features a large lounge that can comfortably seat over 200 guests, a cozy side room for more intimate gatherings of up to 40 people, and expansive outdoor decks perfect for soaking up the sun.
             </p>
           </div>
 
@@ -592,7 +592,7 @@ function HomeView({ setCurrentView, scrollToContact, scrollToAbout }: { setCurre
             </div>
             <h3 className="text-xl font-bold text-white mb-3 uppercase tracking-wider" style={{ fontFamily: 'var(--font-slug)' }}>The Action</h3>
             <p className="text-stone-400 leading-relaxed">
-              But what's a sports pub without the sports? We offer various flat screens and a big screen with surround sound, all equipped with multiple decoders to screen all major sporting events. So, whether you're a football fanatic, a rugby enthusiast, or a cricket lover, you'll never miss a moment of the action.
+              But what's a sports club without the sports? We offer various flat screens and a big screen with surround sound, all equipped with multiple decoders to screen all major sporting events. So, whether you're a football fanatic, a rugby enthusiast, a cricket lover, or a motorsport gear head, you'll never miss a moment of the action.
             </p>
           </div>
         </div>
@@ -683,8 +683,8 @@ function HomeView({ setCurrentView, scrollToContact, scrollToAbout }: { setCurre
                   <span className="text-stone-200 font-bold uppercase tracking-wider text-xs md:text-sm">Fantastic meals</span>
                 </div>
                 <div className="flex flex-col items-center justify-center text-center gap-3 group bg-stone-900 border border-stone-800 p-6 transform hover:-translate-y-1 transition-transform shadow-[4px_4px_0_0_#000]">
-                  <Beer className="w-10 h-10 text-red-600 shrink-0 transform group-hover:scale-110 transition-transform" />
-                  <span className="text-stone-200 font-bold uppercase tracking-wider text-xs md:text-sm">Drinks specials</span>
+                  <Cigarette className="w-10 h-10 text-red-600 shrink-0 transform group-hover:scale-110 transition-transform" />
+                  <span className="text-stone-200 font-bold uppercase tracking-wider text-xs md:text-sm">Smoking & non-smoking sections</span>
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Mail, CheckCircle2, Check, MessageCircle, AlertCircle, Loader2, Calendar, Users, Gift, Utensils, Clock } from 'lucide-react';
+import { Send, Mail, CheckCircle2, Check, MessageCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const TARGET_EMAIL = 'vpclub@mwebbiz.co.za';
 
@@ -127,13 +127,6 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
     lastName: '',
     email: '',
     phone: '',
-    date: '',
-    time: '18:00',
-    guests: '20 - 40 guests',
-    reservationGuests: '4 people',
-    eventType: 'Birthday Party',
-    seatingArea: 'Porch / Verandah (Cricket Field View)',
-    cateringOptions: [] as string[],
     message: '',
   });
 
@@ -143,33 +136,27 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
     email: string;
     phone: string;
     type: string;
-    date?: string;
-    guests?: string | null;
-    message?: string;
+    message: string;
   } | null>(null);
 
-  const toggleCatering = (option: string) => {
-    setFormData(prev => ({
-      ...prev,
-      cateringOptions: prev.cateringOptions.includes(option)
-        ? prev.cateringOptions.filter(o => o !== option)
-        : [...prev.cateringOptions, option]
-    }));
+  const getEnquiryLabel = (type: 'function' | 'general' | 'reservation') => {
+    switch (type) {
+      case 'function':
+        return 'Function Booking';
+      case 'reservation':
+        return 'Table Reservation';
+      case 'general':
+      default:
+        return 'General Inquiry';
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
 
-    const typeTitle =
-      enquiryType === 'function' ? 'Function / Event Booking Request' :
-      enquiryType === 'reservation' ? 'Table Reservation Request' :
-      'General Enquiry';
-
-    const subject =
-      enquiryType === 'function' ? `🎉 [Eddie Macs] Function Booking: ${formData.firstName} ${formData.lastName} (${formData.guests})` :
-      enquiryType === 'reservation' ? `🍽️ [Eddie Macs] Table Booking: ${formData.firstName} ${formData.lastName} (${formData.date})` :
-      `✉️ [Eddie Macs] Website Enquiry from ${formData.firstName} ${formData.lastName}`;
+    const typeTitle = getEnquiryLabel(enquiryType);
+    const subject = `📬 [Eddie Macs] ${typeTitle}: ${formData.firstName} ${formData.lastName}`.trim();
 
     const payload: Record<string, any> = {
       _subject: subject,
@@ -181,22 +168,9 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
       Last_Name: formData.lastName,
       Email: formData.email,
       Phone_WhatsApp: formData.phone,
+      Message: formData.message || 'No additional message provided',
+      Sent_Via: 'Eddie Macs Official Website',
     };
-
-    if (enquiryType === 'function') {
-      payload.Event_Type = formData.eventType;
-      payload.Proposed_Date = formData.date || 'To be confirmed';
-      payload.Estimated_Guests = formData.guests;
-      payload.Catering_Interests = formData.cateringOptions.length > 0 ? formData.cateringOptions.join(', ') : 'None selected';
-    } else if (enquiryType === 'reservation') {
-      payload.Reservation_Date = formData.date || 'Today / Upcoming';
-      payload.Reservation_Time = formData.time;
-      payload.Party_Size = formData.reservationGuests;
-      payload.Seating_Preference = formData.seatingArea;
-    }
-
-    payload.Message = formData.message || 'No additional message provided';
-    payload.Sent_Via = 'Eddie Macs Official Website';
 
     try {
       await fetch(`https://formsubmit.co/ajax/${TARGET_EMAIL}`, {
@@ -213,8 +187,6 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
         email: formData.email,
         phone: formData.phone,
         type: typeTitle,
-        date: formData.date,
-        guests: enquiryType === 'function' ? formData.guests : enquiryType === 'reservation' ? formData.reservationGuests : null,
         message: formData.message,
       });
 
@@ -226,8 +198,6 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
         email: formData.email,
         phone: formData.phone,
         type: typeTitle,
-        date: formData.date,
-        guests: enquiryType === 'function' ? formData.guests : enquiryType === 'reservation' ? formData.reservationGuests : null,
         message: formData.message,
       });
       setStatus('error');
@@ -241,13 +211,6 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
       lastName: '',
       email: '',
       phone: '',
-      date: '',
-      time: '18:00',
-      guests: '20 - 40 guests',
-      reservationGuests: '4 people',
-      eventType: 'Birthday Party',
-      seatingArea: 'Porch / Verandah (Cricket Field View)',
-      cateringOptions: [],
       message: '',
     });
   };
@@ -255,17 +218,15 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
   const whatsappMessage = encodeURIComponent(
     `Hi Eddie Macs! I just submitted an enquiry on your website.\n\n` +
     `*Name:* ${submittedSummary?.name || formData.firstName + ' ' + formData.lastName}\n` +
-    `*Type:* ${submittedSummary?.type || (enquiryType === 'function' ? 'Function Booking' : 'General Enquiry')}\n` +
+    `*Type:* ${submittedSummary?.type || getEnquiryLabel(enquiryType)}\n` +
     (formData.phone ? `*Phone:* ${formData.phone}\n` : '') +
-    (formData.date ? `*Date:* ${formData.date}\n` : '') +
-    (formData.guests && enquiryType === 'function' ? `*Guests:* ${formData.guests}\n` : '') +
-    (formData.message ? `*Notes:* ${formData.message}\n` : '')
+    (formData.message ? `*Message:* ${formData.message}\n` : '')
   );
 
   const mailtoLink = `mailto:${TARGET_EMAIL}?subject=${encodeURIComponent(
     `[Eddie Macs Enquiry] ${formData.firstName} ${formData.lastName}`
   )}&body=${encodeURIComponent(
-    `Name: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nEnquiry Type: ${enquiryType}\nDate: ${formData.date}\n\nMessage:\n${formData.message}`
+    `Name: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nType: ${getEnquiryLabel(enquiryType)}\n\nMessage:\n${formData.message}`
   )}`;
 
   return (
@@ -275,52 +236,12 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
       </div>
 
       <div className="text-center md:text-left mb-8">
-        <div className="inline-flex items-center gap-1.5 bg-red-600/20 border border-red-600/40 text-red-500 font-black uppercase text-xs tracking-widest px-3 py-1 mb-3">
-          <Mail className="w-3.5 h-3.5" /> Direct to {TARGET_EMAIL}
-        </div>
         <h2 className="text-3xl md:text-5xl font-black uppercase tracking-widest text-white border-b-4 border-red-600 inline-block pb-2" style={{ fontFamily: 'var(--font-slug)' }}>
           Contact & Bookings
         </h2>
         <p className="text-stone-300 text-sm md:text-base font-medium mt-3 leading-relaxed">
-          Planning a celebration, team function, reserving a table for the match, or have a question? Complete the form below and your request will auto-send directly to our club managers at <span className="text-yellow-400 font-bold">{TARGET_EMAIL}</span>.
+          Planning a celebration, team function, reserving a table for the match, or have a question? Complete the form below and our team will get back to you as soon as possible.
         </p>
-      </div>
-
-      {/* Mode Selector Tabs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-8 bg-stone-950 p-2 border border-stone-800">
-        <button
-          type="button"
-          onClick={() => setEnquiryType('function')}
-          className={`py-3 px-4 font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            enquiryType === 'function'
-              ? 'bg-red-600 text-white shadow-lg'
-              : 'text-stone-400 hover:text-white hover:bg-stone-900'
-          }`}
-        >
-          <Gift className="w-4 h-4" /> Book a Function
-        </button>
-        <button
-          type="button"
-          onClick={() => setEnquiryType('reservation')}
-          className={`py-3 px-4 font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            enquiryType === 'reservation'
-              ? 'bg-red-600 text-white shadow-lg'
-              : 'text-stone-400 hover:text-white hover:bg-stone-900'
-          }`}
-        >
-          <Utensils className="w-4 h-4" /> Table Reservation
-        </button>
-        <button
-          type="button"
-          onClick={() => setEnquiryType('general')}
-          className={`py-3 px-4 font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
-            enquiryType === 'general'
-              ? 'bg-red-600 text-white shadow-lg'
-              : 'text-stone-400 hover:text-white hover:bg-stone-900'
-          }`}
-        >
-          <Mail className="w-4 h-4" /> General Enquiry
-        </button>
       </div>
 
       {status === 'success' ? (
@@ -341,18 +262,10 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
               <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Enquiry Type:</span>{' '}
               <span className="text-white font-bold">{submittedSummary?.type}</span>
             </div>
-            {submittedSummary?.date && (
-              <div>
-                <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Date:</span>{' '}
-                <span className="text-white font-bold">{submittedSummary?.date}</span>
-              </div>
-            )}
-            {submittedSummary?.guests && (
-              <div>
-                <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Party Size:</span>{' '}
-                <span className="text-white font-bold">{submittedSummary?.guests}</span>
-              </div>
-            )}
+            <div>
+              <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Name:</span>{' '}
+              <span className="text-white font-bold">{submittedSummary?.name}</span>
+            </div>
             <div>
               <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Email:</span>{' '}
               <span className="text-white font-bold">{submittedSummary?.email}</span>
@@ -361,6 +274,12 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
               <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Phone:</span>{' '}
               <span className="text-white font-bold">{submittedSummary?.phone}</span>
             </div>
+            {submittedSummary?.message && (
+              <div>
+                <span className="text-stone-500 uppercase text-xs font-black tracking-wider">Details:</span>{' '}
+                <span className="text-stone-200">{submittedSummary.message}</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -374,7 +293,7 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
             </a>
             <button
               onClick={handleReset}
-              className="w-full sm:w-auto bg-stone-800 hover:bg-stone-700 text-white font-bold uppercase tracking-wider py-3.5 px-6 transition-all"
+              className="w-full sm:w-auto bg-stone-800 hover:bg-stone-700 text-white font-bold uppercase tracking-wider py-3.5 px-6 transition-all cursor-pointer"
             >
               Send Another Enquiry
             </button>
@@ -382,6 +301,22 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Enquiry Type Dropdown */}
+          <div className="space-y-2">
+            <label className="text-stone-300 font-bold uppercase tracking-wider text-xs">
+              Enquiry Type *
+            </label>
+            <select
+              value={enquiryType}
+              onChange={(e) => setEnquiryType(e.target.value as 'function' | 'general' | 'reservation')}
+              className="w-full bg-stone-950 border border-stone-800 p-4 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
+            >
+              <option value="function">Function Booking</option>
+              <option value="reservation">Table Reservation</option>
+              <option value="general">General Inquiry</option>
+            </select>
+          </div>
+
           {/* Name Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -434,175 +369,19 @@ export function ContactAndBookingForm({ enquiryType, setEnquiryType }: ContactPr
             </div>
           </div>
 
-          {/* Function Specific Fields */}
-          {enquiryType === 'function' && (
-            <div className="bg-stone-950 border border-stone-800 p-6 space-y-6 animate-in fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-red-500" /> Proposed Date *
-                  </label>
-                  <input 
-                    type="date" 
-                    required 
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5 text-red-500" /> Estimated Guests *
-                  </label>
-                  <select
-                    value={formData.guests}
-                    onChange={(e) => setFormData({ ...formData, guests: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
-                  >
-                    <option value="10 - 20 guests">10 - 20 guests</option>
-                    <option value="20 - 40 guests">20 - 40 guests</option>
-                    <option value="40 - 70 guests">40 - 70 guests</option>
-                    <option value="70 - 100+ guests">70 - 100+ guests</option>
-                    <option value="100+ Large Function">100+ Large Function</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Gift className="w-3.5 h-3.5 text-red-500" /> Event Type
-                  </label>
-                  <select
-                    value={formData.eventType}
-                    onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
-                  >
-                    <option value="Birthday Party">Birthday Party</option>
-                    <option value="Corporate / Year-End Event">Corporate / Year-End Event</option>
-                    <option value="Sports Club / Tour Event">Sports Club / Tour Event</option>
-                    <option value="Stag / Hen Party">Stag / Hen Party</option>
-                    <option value="Anniversary / Family Gathering">Anniversary / Family Gathering</option>
-                    <option value="Other Function">Other Function</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Catering Interests */}
-              <div className="space-y-2 pt-2">
-                <label className="text-stone-300 font-bold uppercase tracking-wider text-xs block">
-                  Catering Interests (Select any that apply):
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'Braai Packs (Cuyler Butchery)',
-                    'Lekker Snack Platters (R99pp)',
-                    'Pizza Menu Packages',
-                    'Captains Table Deals',
-                    'Bar / Drinks Only',
-                  ].map(option => {
-                    const isSelected = formData.cateringOptions.includes(option);
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => toggleCatering(option)}
-                        className={`text-xs uppercase font-bold py-2 px-3 border transition-all ${
-                          isSelected
-                            ? 'bg-yellow-500 text-stone-950 border-yellow-500 shadow'
-                            : 'bg-stone-900 text-stone-300 border-stone-800 hover:border-stone-700'
-                        }`}
-                      >
-                        {isSelected ? '✓ ' : '+ '} {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Table Reservation Specific Fields */}
-          {enquiryType === 'reservation' && (
-            <div className="bg-stone-950 border border-stone-800 p-6 space-y-6 animate-in fade-in">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-red-500" /> Date *
-                  </label>
-                  <input 
-                    type="date" 
-                    required 
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors" 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-red-500" /> Time *
-                  </label>
-                  <select
-                    value={formData.time}
-                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
-                  >
-                    <option value="11:30 (Lunch)">11:30 (Lunch)</option>
-                    <option value="12:30 (Lunch)">12:30 (Lunch)</option>
-                    <option value="13:30 (Lunch)">13:30 (Lunch)</option>
-                    <option value="15:00 (Afternoon)">15:00 (Afternoon)</option>
-                    <option value="17:00 (Sundowner)">17:00 (Sundowner)</option>
-                    <option value="18:00 (Dinner)">18:00 (Dinner)</option>
-                    <option value="19:00 (Dinner)">19:00 (Dinner)</option>
-                    <option value="20:00 (Late Dinner)">20:00 (Late Dinner)</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-stone-300 font-bold uppercase tracking-wider text-xs flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5 text-red-500" /> Number of People
-                  </label>
-                  <select
-                    value={formData.reservationGuests}
-                    onChange={(e) => setFormData({ ...formData, reservationGuests: e.target.value })}
-                    className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
-                  >
-                    <option value="1 - 2 people">1 - 2 people</option>
-                    <option value="3 - 4 people">3 - 4 people</option>
-                    <option value="5 - 8 people">5 - 8 people</option>
-                    <option value="8 - 12 people">8 - 12 people</option>
-                    <option value="12+ people (Group)">12+ people (Group)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-stone-300 font-bold uppercase tracking-wider text-xs">Seating Preference</label>
-                <select
-                  value={formData.seatingArea}
-                  onChange={(e) => setFormData({ ...formData, seatingArea: e.target.value })}
-                  className="w-full bg-stone-900 border border-stone-800 p-3.5 text-white font-medium focus:border-red-600 focus:outline-none transition-colors"
-                >
-                  <option value="Porch / Verandah (Cricket Field View)">Porch / Verandah (Cricket Field View)</option>
-                  <option value="Near Big Screen TVs (Live Sports / Rugby)">Near Big Screen TVs (Live Sports / Rugby)</option>
-                  <option value="Indoor Main Bar / Dining">Indoor Main Bar / Dining</option>
-                  <option value="No Preference / Best Available">No Preference / Best Available</option>
-                </select>
-              </div>
-            </div>
-          )}
-
           {/* Message Area */}
           <div className="space-y-2">
             <label className="text-stone-300 font-bold uppercase tracking-wider text-xs">
-              {enquiryType === 'function' ? 'Special Requirements / Details (Optional)' :
-               enquiryType === 'reservation' ? 'Special Requests / Notes (Optional)' :
-               'Write your message *'}
+              Message / Details *
             </label>
             <textarea 
-              required={enquiryType === 'general'}
+              required
               rows={4} 
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
               placeholder={
-                enquiryType === 'function' ? 'Tell us any special requirements, music, dietary notes, or decor arrangements...' :
-                enquiryType === 'reservation' ? 'Any specific table preferences, birthday candles, or dietary requirements...' :
+                enquiryType === 'function' ? 'Tell us about your event, preferred date, estimated guests, or special requirements...' :
+                enquiryType === 'reservation' ? 'Tell us your preferred date, time, party size, or seating preference...' :
                 'How can we help you today?'
               }
               className="w-full bg-stone-950 border border-stone-800 p-4 text-white font-medium focus:border-red-600 focus:outline-none transition-colors resize-none"
