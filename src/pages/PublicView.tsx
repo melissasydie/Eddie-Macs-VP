@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { Home, Sun, Briefcase, Gift, Trophy, CheckCircle2, Beer, Utensils, Pizza, Flame, Phone, MapPin, Globe, Menu as MenuIcon, MessageCircle, X, ChevronRight, ArrowLeft, ChevronLeft, Send, Mail, Tv, Users, Music, Clock, Calendar, Car, Facebook, Instagram, Download, FileText, Eye, Loader2, Check, AlertCircle, Cigarette } from 'lucide-react';
+import { Home, Sun, Briefcase, Gift, Trophy, CheckCircle2, Beer, Utensils, Pizza, Flame, Phone, MapPin, Globe, Menu as MenuIcon, MessageCircle, X, ChevronRight, ArrowLeft, ChevronLeft, Send, Mail, Tv, Users, Music, Clock, Calendar, Car, Facebook, Instagram, Download, FileText, Eye, Loader2, Check, AlertCircle, Cigarette, Upload } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { MailingListForm, ContactAndBookingForm } from '../components/ContactForms';
+import { downloadPdfFile } from '../utils/downloadPdf';
 
 export default function PublicView() {
   const [currentView, setCurrentView] = useState<'home' | 'menus' | 'contact' | 'about' | 'specials' | 'main' | 'braai' | 'treats' | 'pizza' | 'additional' | 'halfprice' | 'downloads'>('home');
@@ -32,6 +33,7 @@ export default function PublicView() {
     { id: 'home', label: 'HOME' },
     { id: 'about', label: 'ABOUT US' },
     { id: 'menus', label: 'MENU' },
+    { id: 'downloads', label: 'DOWNLOADS' },
     { id: 'events', label: 'EVENTS', href: 'https://www.facebook.com/EddieMacsatVPSportsClub/events' },
     { id: 'contact', label: 'CONTACT' },
   ];
@@ -258,6 +260,8 @@ export default function PublicView() {
                   <span className="text-stone-700">|</span>
                   <button onClick={() => setCurrentView('menus')} className="hover:text-red-500 transition-colors">MENU</button>
                   <span className="text-stone-700">|</span>
+                  <button onClick={() => setCurrentView('downloads')} className="hover:text-red-500 transition-colors">DOWNLOADS</button>
+                  <span className="text-stone-700">|</span>
                   <a href="https://www.facebook.com/EddieMacsatVPSportsClub/events" target="_blank" rel="noreferrer" className="hover:text-red-500 transition-colors">EVENTS</a>
                   <span className="text-stone-700">|</span>
                   <button onClick={() => setCurrentView('contact')} className="hover:text-red-500 transition-colors">CONTACT</button>
@@ -277,6 +281,19 @@ export default function PublicView() {
 }
 
 function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void }) {
+  const [downloadingMenu, setDownloadingMenu] = useState<string | null>(null);
+
+  const handleDownload = async (file: string, id: string) => {
+    setDownloadingMenu(id);
+    try {
+      await downloadPdfFile(`/assets/menus/${file}`, file);
+    } catch (err) {
+      console.error('Failed to download PDF:', err);
+    } finally {
+      setDownloadingMenu(null);
+    }
+  };
+
   const menus = [
     {
       id: 'main',
@@ -284,7 +301,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Breakfast, Steaks, Burgers, Ribs, Seafood, Baskets & Desserts',
       badge: 'Sit Down Only • 10am - 10pm',
       file: 'main-menu.pdf',
-      size: 'PDF Document • 6.0 KB',
+      size: '8.7 MB • PDF',
       color: 'border-red-600',
       badgeColor: 'bg-red-600 text-white',
       highlights: '180g Burgers, Eisbein, 800g Ribs, T-Bone 350g, Starters & Little Sports',
@@ -295,7 +312,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Unbeatable deals every day of the week',
       badge: 'Sit Down Only • Mon - Sun 11am - 8pm',
       file: 'daily-specials.pdf',
-      size: 'PDF Document • 3.4 KB',
+      size: '4.3 MB • PDF',
       color: 'border-blue-600',
       badgeColor: 'bg-blue-600 text-white',
       highlights: 'R59.90 English Bfast, BOGO Pizza, R99 Friday Meals & R199 Ribs',
@@ -306,7 +323,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Everything you need for a legendary braai! Cuyler Butchery meat',
       badge: 'Min 10 Guests • Book 10 Days Prior',
       file: 'braai-packs.pdf',
-      size: 'PDF Document • 2.9 KB',
+      size: '4.6 MB • PDF',
       color: 'border-yellow-500',
       badgeColor: 'bg-yellow-500 text-black',
       highlights: 'R129pp Braai Pack & R159pp Ultimate with Wood, Salads, Bin & Grill',
@@ -317,7 +334,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Delicious thin based wood-fired style pizzas',
       badge: 'WhatsApp & Collect • Mon - Sun 11am - 8pm',
       file: 'pizza-menu.pdf',
-      size: 'PDF Document • 3.1 KB',
+      size: '3.6 MB • PDF',
       color: 'border-orange-500',
       badgeColor: 'bg-orange-600 text-white',
       highlights: 'Basic & Deluxe: Cheesy Griller, Pork Deluxe, Spicy BBQ & Meaty Pizzas',
@@ -328,7 +345,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Platters & deals made for sharing and good times',
       badge: 'Bargain Buy for the Table',
       file: 'tasty-treats.pdf',
-      size: 'PDF Document • 2.8 KB',
+      size: '3.3 MB • PDF',
       color: 'border-yellow-500',
       badgeColor: 'bg-yellow-500 text-black',
       highlights: 'Lekker Snack Platters (x4 to x10), R99 Burgers, Wraps & Sharing Pizzas',
@@ -339,7 +356,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Snack platters, braai packs & catering for functions',
       badge: 'Groups, Teams & Events',
       file: 'additional-menu-options.pdf',
-      size: 'PDF Document • 2.9 KB',
+      size: '5.4 MB • PDF',
       color: 'border-stone-600',
       badgeColor: 'bg-stone-700 text-white',
       highlights: 'R99pp Platters, 4pc Braai Packs, Salads & Banking Details for Bookings',
@@ -350,7 +367,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
       tagline: 'Great food. Great company. Half the price!',
       badge: 'Wednesdays Only • Sit Down Only',
       file: 'wednesday-half-price.pdf',
-      size: 'PDF Document • 3.3 KB',
+      size: '2.0 MB • PDF',
       color: 'border-green-600',
       badgeColor: 'bg-green-600 text-white',
       highlights: '16 Legendary Mains at 50% Off: Ribs, Eisbein, Steaks, Burgers & Seafood',
@@ -405,7 +422,7 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 ${menu.badgeColor}`}>
                     {menu.badge}
                   </span>
-                  <span className="text-stone-500 text-xs font-mono">
+                  <span className="text-stone-400 text-xs font-semibold">
                     {menu.size}
                   </span>
                 </div>
@@ -431,13 +448,24 @@ function DownloadsView({ setCurrentView }: { setCurrentView: (v: any) => void })
                   <Eye className="w-4 h-4 text-red-500" /> View Online
                 </button>
 
-                <a
-                  href={`/assets/menus/${menu.file}`}
-                  download={menu.file}
-                  className="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs font-black uppercase tracking-wider py-2.5 px-3 transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0_0_#000]"
+                <button
+                  type="button"
+                  onClick={() => handleDownload(menu.file, menu.id)}
+                  disabled={downloadingMenu === menu.id}
+                  className="flex-1 bg-red-600 hover:bg-red-500 disabled:bg-stone-800 text-white text-xs font-black uppercase tracking-wider py-2.5 px-3 transition-all flex items-center justify-center gap-1.5 shadow-[2px_2px_0_0_#000] cursor-pointer"
                 >
-                  <Download className="w-4 h-4" /> Download PDF
-                </a>
+                  {downloadingMenu === menu.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Saving PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      <span>Download PDF</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           ))}
@@ -828,9 +856,28 @@ function MenusHubView({ setCurrentView }: { setCurrentView: (v: any) => void }) 
 
   return (
     <div className="animate-in fade-in duration-500 max-w-4xl mx-auto">
-      <div className="text-center mb-12">
+      <div className="text-center mb-8">
         <h2 className="text-5xl md:text-7xl font-black uppercase tracking-wider text-red-600 drop-shadow-xl mb-0 leading-none" style={{ fontFamily: 'var(--font-slug)' }}>Our</h2>
         <h2 className="text-6xl md:text-8xl font-black uppercase tracking-wider text-white drop-shadow-xl leading-none" style={{ fontFamily: 'var(--font-slug)' }}>Menus</h2>
+      </div>
+
+      {/* Quick link to downloads */}
+      <div className="bg-stone-900 border border-stone-800 p-4 md:p-5 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-3 text-center sm:text-left">
+          <div className="bg-red-600/20 text-red-500 p-3 rounded-full border border-red-500/30 shrink-0">
+            <Download className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-base md:text-lg font-black uppercase tracking-wider text-white">Need Printable PDF Menus?</h3>
+            <p className="text-stone-400 text-xs font-medium">Download all official menus to view offline, print, or share for events.</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setCurrentView('downloads')}
+          className="bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-wider text-xs py-2.5 px-5 transition-all shadow-[2px_2px_0_0_#000] shrink-0 hover:scale-105"
+        >
+          View PDF Downloads &rarr;
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -863,6 +910,20 @@ function MenusHubView({ setCurrentView }: { setCurrentView: (v: any) => void }) 
 }
 
 function MenuWrapper({ setCurrentView, children, pdfFile }: { setCurrentView: (v: any) => void, children: React.ReactNode, pdfFile?: string }) {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!pdfFile || isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await downloadPdfFile(`/assets/menus/${pdfFile}`, pdfFile);
+    } catch (e) {
+      console.error('Download failed', e);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="animate-in slide-in-from-right-8 duration-300">
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -873,13 +934,24 @@ function MenuWrapper({ setCurrentView, children, pdfFile }: { setCurrentView: (v
           <ArrowLeft className="w-5 h-5" /> Back to Menus
         </button>
         {pdfFile && (
-          <a
-            href={`/assets/menus/${pdfFile}`}
-            download={pdfFile}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-wider transition-all px-4 py-2 shadow-[2px_2px_0_0_#000] hover:scale-105"
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className="flex items-center gap-2 bg-red-600 hover:bg-red-500 disabled:bg-stone-800 text-white font-black uppercase tracking-wider transition-all px-4 py-2 shadow-[2px_2px_0_0_#000] hover:scale-105 cursor-pointer"
           >
-            <Download className="w-4 h-4" /> Download PDF Menu
-          </a>
+            {isDownloading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <span>Saving PDF...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                <span>Download PDF Menu</span>
+              </>
+            )}
+          </button>
         )}
       </div>
       {children}
