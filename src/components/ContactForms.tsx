@@ -147,7 +147,7 @@ Thank you!`;
               type="submit" 
               className="bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest py-4 px-8 shadow-[4px_4px_0_0_#1c1917] transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
             >
-              <WhatsAppIcon className="w-5 h-5" /> Join WhatsApp Group
+              <WhatsAppIcon className="w-5 h-5" /> Join the Eddie Macs@VP Tribe!
             </button>
           </form>
         )}
