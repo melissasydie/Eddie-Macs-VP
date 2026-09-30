@@ -2,16 +2,73 @@ import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Home, Sun, Briefcase, Gift, Trophy, CheckCircle2, Beer, Utensils, Pizza, Flame, Phone, MapPin, Globe, Menu as MenuIcon, MessageCircle, X, ChevronRight, ArrowLeft, ChevronLeft, Send, Mail, Tv, Users, Music, Clock, Calendar, Car, Facebook, Instagram, Download, FileText, Eye, Loader2, Check, AlertCircle, Cigarette, Upload } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { MailingListForm, ContactAndBookingForm } from '../components/ContactForms';
 import { downloadPdfFile } from '../utils/downloadPdf';
 
-export default function PublicView() {
-  const [currentView, setCurrentView] = useState<'home' | 'menus' | 'contact' | 'about' | 'specials' | 'main' | 'braai' | 'treats' | 'pizza' | 'additional' | 'halfprice' | 'downloads'>('home');
+export type PublicViewType = 'home' | 'menus' | 'contact' | 'about' | 'specials' | 'main' | 'braai' | 'treats' | 'pizza' | 'additional' | 'halfprice' | 'downloads';
+
+interface PublicViewProps {
+  initialView?: PublicViewType;
+}
+
+export default function PublicView({ initialView = 'home' }: PublicViewProps) {
+  const [currentView, setCurrentView] = useState<PublicViewType>(initialView);
   const [categories, setCategories] = useState<any[]>([]);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [specials, setSpecials] = useState<any[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Sync state if user arrives directly via /menu or uses browser back/forward buttons
+  useEffect(() => {
+    if (location.pathname === '/menu' || location.pathname === '/menus') {
+      setCurrentView(prev => {
+        const menuViews = ['menus', 'specials', 'main', 'braai', 'treats', 'pizza', 'additional', 'halfprice'];
+        return menuViews.includes(prev) ? prev : 'menus';
+      });
+    } else if (location.pathname === '/') {
+      setCurrentView(prev => {
+        const menuViews = ['menus', 'specials', 'main', 'braai', 'treats', 'pizza', 'additional', 'halfprice'];
+        return menuViews.includes(prev) ? 'home' : prev;
+      });
+    }
+  }, [location.pathname]);
+
+  // Keep page title dynamically synced with view
+  useEffect(() => {
+    const isMenuSection = ['menus', 'specials', 'main', 'braai', 'treats', 'pizza', 'additional', 'halfprice'].includes(currentView);
+    if (isMenuSection) {
+      document.title = "Menu - Eddie Macs @ VP";
+    } else if (currentView === 'about') {
+      document.title = "About Us - Eddie Macs @ VP";
+    } else if (currentView === 'contact') {
+      document.title = "Contact & Bookings - Eddie Macs @ VP";
+    } else if (currentView === 'downloads') {
+      document.title = "Downloads & Menus - Eddie Macs @ VP";
+    } else {
+      document.title = "Eddie Macs @ VP - Sports Club, Grub & Function Venue";
+    }
+  }, [currentView]);
+
+  const handleViewChange = (view: PublicViewType) => {
+    setCurrentView(view);
+    const menuViews = ['menus', 'specials', 'main', 'braai', 'treats', 'pizza', 'additional', 'halfprice'];
+    if (menuViews.includes(view)) {
+      if (location.pathname !== '/menu') {
+        navigate('/menu');
+      }
+    } else if (view === 'home') {
+      if (location.pathname !== '/') {
+        navigate('/');
+      }
+    } else if (view === 'about' || view === 'contact') {
+      if (location.pathname !== '/') {
+        navigate('/');
+      }
+    }
+  };
 
   useEffect(() => {
     const unsubCats = onSnapshot(collection(db, 'categories'), (snap) => {
@@ -43,7 +100,7 @@ export default function PublicView() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-black/75 border-b border-white/10 backdrop-blur-md">
         <div className="max-w-[1400px] mx-auto px-4 py-1.5 sm:py-2 md:py-3 flex justify-between items-center">
-          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0" onClick={() => setCurrentView('home')}>
+          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0" onClick={() => handleViewChange('home')}>
             <span className="text-white text-2xl sm:text-3xl md:text-4xl leading-none" style={{ fontFamily: 'var(--font-yellowtail)' }}>Eddie Macs@VP</span>
           </div>
 
@@ -63,7 +120,7 @@ export default function PublicView() {
               ) : (
                 <button
                   key={item.id}
-                  onClick={() => setCurrentView(item.id as any)}
+                  onClick={() => handleViewChange(item.id as any)}
                   className={`pb-1 font-bold uppercase tracking-widest text-sm transition-all border-b-2 ${currentView === item.id || (item.id === 'menus' && currentView !== 'home' && currentView !== 'contact' && currentView !== 'about') ? 'text-white border-red-600' : 'text-stone-300 border-transparent hover:text-white hover:border-red-600'}`}
                 >
                   {item.label}
@@ -146,7 +203,7 @@ export default function PublicView() {
               ) : (
                 <button
                   key={item.id}
-                  onClick={() => { setCurrentView(item.id as any); setIsMobileMenuOpen(false); }}
+                  onClick={() => { handleViewChange(item.id as any); setIsMobileMenuOpen(false); }}
                   className={`block w-full text-left px-6 py-4 font-black uppercase tracking-wider border-b border-stone-800 ${currentView === item.id || (item.id === 'menus' && currentView !== 'home' && currentView !== 'contact' && currentView !== 'about') ? 'bg-red-600 text-white' : 'text-stone-300 hover:bg-stone-800'}`}
                 >
                   {item.label}
@@ -159,16 +216,16 @@ export default function PublicView() {
       </header>
 
       <main className="max-w-[1400px] mx-auto px-4 pt-0 md:pt-6 pb-8 md:pb-12">
-        {(currentView === 'home' || currentView === 'contact' || currentView === 'about') && <HomeView setCurrentView={setCurrentView} scrollToContact={currentView === 'contact'} scrollToAbout={currentView === 'about'} />}
-        {currentView === 'menus' && <MenusHubView setCurrentView={setCurrentView} />}
-        {currentView === 'specials' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="daily-specials.pdf"><SpecialsView specials={specials} /></MenuWrapper>}
-        {currentView === 'main' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="main-menu.pdf"><MainMenuView categories={categories} items={menuItems} /></MenuWrapper>}
-        {currentView === 'braai' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="braai-packs.pdf"><BraaiPacksView /></MenuWrapper>}
-        {currentView === 'treats' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="tasty-treats.pdf"><TastyTreatsView /></MenuWrapper>}
-        {currentView === 'pizza' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="pizza-menu.pdf"><PizzaMenuView /></MenuWrapper>}
-        {currentView === 'additional' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="additional-menu-options.pdf"><AdditionalMenuOptionsView /></MenuWrapper>}
-        {currentView === 'halfprice' && <MenuWrapper setCurrentView={setCurrentView} pdfFile="wednesday-half-price.pdf"><WednesdayHalfPriceView /></MenuWrapper>}
-        {currentView === 'downloads' && <DownloadsView setCurrentView={setCurrentView} />}
+        {(currentView === 'home' || currentView === 'contact' || currentView === 'about') && <HomeView setCurrentView={handleViewChange} scrollToContact={currentView === 'contact'} scrollToAbout={currentView === 'about'} />}
+        {currentView === 'menus' && <MenusHubView setCurrentView={handleViewChange} />}
+        {currentView === 'specials' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="daily-specials.pdf"><SpecialsView specials={specials} /></MenuWrapper>}
+        {currentView === 'main' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="main-menu.pdf"><MainMenuView categories={categories} items={menuItems} /></MenuWrapper>}
+        {currentView === 'braai' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="braai-packs.pdf"><BraaiPacksView /></MenuWrapper>}
+        {currentView === 'treats' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="tasty-treats.pdf"><TastyTreatsView /></MenuWrapper>}
+        {currentView === 'pizza' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="pizza-menu.pdf"><PizzaMenuView /></MenuWrapper>}
+        {currentView === 'additional' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="additional-menu-options.pdf"><AdditionalMenuOptionsView /></MenuWrapper>}
+        {currentView === 'halfprice' && <MenuWrapper setCurrentView={handleViewChange} pdfFile="wednesday-half-price.pdf"><WednesdayHalfPriceView /></MenuWrapper>}
+        {currentView === 'downloads' && <DownloadsView setCurrentView={handleViewChange} />}
       </main>
 
       <div className="relative w-screen left-[50%] right-[50%] -ml-[50vw] -mr-[50vw] h-64 md:h-80 border-t-[6px] border-stone-800 overflow-hidden mt-0">
@@ -254,17 +311,17 @@ export default function PublicView() {
                </div>
                
                <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-2 text-sm md:text-base font-bold uppercase tracking-widest text-stone-400 order-1 lg:order-2">
-                  <button onClick={() => setCurrentView('home')} className="hover:text-red-500 transition-colors">HOME</button>
+                  <button onClick={() => handleViewChange('home')} className="hover:text-red-500 transition-colors">HOME</button>
                   <span className="text-stone-700">|</span>
-                  <button onClick={() => setCurrentView('about')} className="hover:text-red-500 transition-colors">ABOUT US</button>
+                  <button onClick={() => handleViewChange('about')} className="hover:text-red-500 transition-colors">ABOUT US</button>
                   <span className="text-stone-700">|</span>
-                  <button onClick={() => setCurrentView('menus')} className="hover:text-red-500 transition-colors">MENU</button>
+                  <button onClick={() => handleViewChange('menus')} className="hover:text-red-500 transition-colors">MENU</button>
                   <span className="text-stone-700">|</span>
-                  <button onClick={() => setCurrentView('downloads')} className="hover:text-red-500 transition-colors">DOWNLOADS</button>
+                  <button onClick={() => handleViewChange('downloads')} className="hover:text-red-500 transition-colors">DOWNLOADS</button>
                   <span className="text-stone-700">|</span>
                   <a href="https://www.facebook.com/EddieMacsatVPSportsClub/events" target="_blank" rel="noreferrer" className="hover:text-red-500 transition-colors">EVENTS</a>
                   <span className="text-stone-700">|</span>
-                  <button onClick={() => setCurrentView('contact')} className="hover:text-red-500 transition-colors">CONTACT</button>
+                  <button onClick={() => handleViewChange('contact')} className="hover:text-red-500 transition-colors">CONTACT</button>
                </div>
                
                <div className="text-center lg:text-right flex flex-col items-center lg:items-end order-2 lg:order-3">

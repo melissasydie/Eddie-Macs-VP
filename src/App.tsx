@@ -30,9 +30,12 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<PublicView />} />
+        <Route path="/" element={<PublicView initialView="home" />} />
+        <Route path="/menu" element={<PublicView initialView="menus" />} />
+        <Route path="/menus" element={<Navigate to="/menu" replace />} />
         <Route path="/admin" element={user ? <AdminDashboard /> : <Navigate to="/login" />} />
         <Route path="/login" element={user ? <Navigate to="/admin" /> : <AdminLogin />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
